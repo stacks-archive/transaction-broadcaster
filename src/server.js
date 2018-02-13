@@ -8,6 +8,81 @@ function transactionToTxId(transaction: String) {
     .toString('hex')
 }
 
+function checkTransactions(entries: Array<{txToWatch: String, confirmations: Number}>) {
+  return bskConfig.network.getBlockHeight().then(
+    blockHeight => Promise.all(entries.map(
+      entry => {
+        return bskConfig.network.getTransactionInfo(entry.txToWatch)
+          .then(txInfo => {
+            if (!txInfo.block_height) {
+              logger.info(`Failed to get block_height for ${entry.txToWatch} --- probably still unconfirmed.`)
+              return false
+            } else if (1 + blockHeight - txInfo.block_height < entry.confirmations) {
+              logger.info(`${entry.txToWatch}: has ${1 + blockHeight - txInfo.block_height} confirmations.`)
+              return false
+            } else {
+              return true
+            }
+          })
+          .then(status => Object.assign({}, entry, { status }))
+      })))
+}
+
+// this is a hack -- this is a stand-in while we roll out support for
+//   publishing zonefiles via core.blockstack
+export function directlyPublishZonefile(zonefile: string) {
+  // speak directly to node.blockstack
+
+  const b64Zonefile = Buffer.from(zonefile).toString('base64')
+
+  const postData = '<?xml version=\'1.0\'?>' +
+        '<methodCall><methodName>put_zonefiles</methodName>' +
+        `<params><param><array><data><value>
+         <string>${b64Zonefile}</string></value>
+         </data></array></param></params>` +
+        '</methodCall>'
+  return fetch('https://node.blockstack.org:6263/RPC2',
+               { method: 'POST',
+                 body: postData })
+    .then(resp => {
+      if (resp.status >= 200 && resp.status <= 299){
+        return resp.text()
+      } else {
+        logger.error(`Publish zonefile error: Response code from node.blockstack: ${resp.status}`)
+        resp.text().then(
+          (text) => logger.error(`Publish zonefile error: Response from node.blockstack: ${text}`))
+        throw new Error('Failed to publish zonefile. Bad response from node.blockstack')
+      }
+    })
+    .then(respText => {
+      const start = respText.indexOf('<string>') + '<string>'.length
+      const stop = respText.indexOf('</string>')
+      const dataResp = respText.slice(start, stop)
+      let jsonResp
+      try {
+        jsonResp = JSON.parse(dataResp)
+      } catch (err) {
+        logger.error(`Failed to parse JSON response from node.blockstack: ${respText}`)
+        throw err
+      }
+      if ('error' in jsonResp) {
+        logger.error(`Error in publishing zonefile: ${JSON.stringify(jsonResp)}`)
+        throw new Error(jsonResp.error)
+      }
+
+      if (!jsonResp.saved || jsonResp.saved.length < 1) {
+        throw new Error('Invalid "saved" response from node.blockstack')
+      }
+
+      if (jsonResp.saved[0] === 1) {
+        return true
+      } else if (jsonResp.saved[0] === 0) {
+        throw new Error('Zonefile not saved')
+      }
+
+      throw new Error('Invalid "saved" response from node.blockstack')
+    })
+}
 
 export class TransactionBroadcaster {
   constructor(config: {}) {
@@ -29,6 +104,10 @@ export class TransactionBroadcaster {
 
   broadcastNow(txHex: String) {
     return bskConfig.network.broadcastTransaction(txHex)
+  }
+
+  broadcastZoneFile(zonefile: String) {
+    return directlyPublishZonefile(zonefile)
   }
 
   queueZoneFileBroadcast(zoneFile: String, txidToWatch: String) {

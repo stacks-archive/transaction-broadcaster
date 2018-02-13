@@ -5,6 +5,7 @@ const CREATE_TX_QUEUE = `CREATE TABLE watch_tx_with_tx_queue (
  queue_ix INTEGER PRIMARY KEY,
  toWatchTxHash TEXT NOT NULL,
  toBroadcastHex TEXT NOT NULL,
+ confirmations INTEGER DEFAULT 4,
  received_ts DATETIME DEFAULT CURRENT_TIMESTAMP
 );`
 
@@ -116,18 +117,57 @@ export class TransactionQueueDB {
   }
 
   queueTransactionToBroadcast(toBroadcast, txidToWatch, confirmations) {
-
+    const cmd = `INSERT INTO watch_tx_with_tx_queue (toBroadcastHex, toWatchTxHash, confirmations)
+                  VALUES (?, ?, ?)`
+    const args = [toBroadcast, txidToWatch, confirmations]
+    return dbRun(this.db, cmd, args)
   }
 
   queueZoneFileBroadcast(zoneFile, txidToWatch) {
-
+    const cmd = `INSERT INTO watch_tx_with_zf_queue (toBroadcastZF, toWatchTxHash)
+                  VALUES (?, ?)`
+    const args = [zoneFile, txidToWatch]
+    return dbRun(this.db, cmd, args)
   }
 
   getTrackedTransactions() {
+    const txCmd = `SELECT * FROM watch_tx_with_tx_queue`
+    const zfCmd = `SELECT * FROM watch_tx_with_zf_queue`
 
+    return Promise.all([dbAll(this.db, txCmd), dbAll(this.db, zfCmd)])
+      .then(([transactionWatching, zoneFileWatching]) => {
+        const results = []
+        transactionWatch.forEach(record => {
+          results.push({
+            type: 'transaction',
+            transaction: record.toBroadcastHex,
+            txToWatch: record.toWatchTxHash,
+            confirmations: record.confirmations
+          })
+        })
+        zoneFileWatching.forEach(record => {
+          results.push({
+            type: 'zoneFile',
+            transaction: record.toBroadcastZF,
+            txToWatch: record.toWatchTxHash,
+            confirmations: record.confirmations
+          })
+        })
+        return results
+      })
   }
 
-  clearWatchedTransaction() {
-
+  clearWatchedTransaction(entry: {type: String, txToWatch: String}) {
+    let table
+    if (entry.type === 'transaction') {
+      table = 'watch_tx_with_tx_queue'
+    } else if (entry.type === 'zoneFile') {
+      table = 'watch_tx_with_zf_queue'
+    } else {
+      throw new Error(`Unknown tracking type: ${entry.type}`)
+    }
+    const cmd = `DELETE FROM ${table} WHERE toWatchTxHash = ?`
+    const args = [txToWatch]
+    return dbRun(this.db, cmd. args)
   }
 }
