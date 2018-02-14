@@ -13,7 +13,7 @@ const configDevelopDefaults = {
   checkTransactionPeriod: 0.1,
   dbLocation: '/tmp/subdomain_registrar.db',
   regtest: true,
-  port: 3000
+  port: 16269
 }
 
 const configDefaults = {
