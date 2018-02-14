@@ -130,7 +130,7 @@ export function makeHTTPServer(config) {
       // schedule timers
       setInterval(() => {
         logger.debug('Waking up to check transactions')
-        server.checkQueue()
+        server.checkWatchlist()
       }, transactionDelay)
       return app
     })
