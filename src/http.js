@@ -1,3 +1,9 @@
+import cors from 'cors'
+import express from 'express'
+import bodyParser from 'body-parser'
+import logger from 'winston'
+
+import { TransactionBroadcaster } from './server'
 
 const HEADERS = { 'Content-Type': 'application/json' }
 
@@ -116,4 +122,15 @@ export function makeHTTPServer(config) {
       })
   })
 
+  const transactionDelay = Math.min(2147483647,
+                                    Math.floor(60000 * config.checkTransactionPeriod))
+
+  return server.initializeServer()
+    .then(() => {
+      // schedule timers
+      setInterval(() => {
+        logger.debug('Waking up to check transactions')
+        server.checkQueue()
+      }, transactionDelay)
+    })
 }

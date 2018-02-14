@@ -131,13 +131,13 @@ export class TransactionQueueDB {
   }
 
   getTrackedTransactions() {
-    const txCmd = `SELECT * FROM watch_tx_with_tx_queue`
-    const zfCmd = `SELECT * FROM watch_tx_with_zf_queue`
+    const txCmd = 'SELECT * FROM watch_tx_with_tx_queue'
+    const zfCmd = 'SELECT * FROM watch_tx_with_zf_queue'
 
     return Promise.all([dbAll(this.db, txCmd), dbAll(this.db, zfCmd)])
       .then(([transactionWatching, zoneFileWatching]) => {
         const results = []
-        transactionWatch.forEach(record => {
+        transactionWatching.forEach(record => {
           results.push({
             type: 'transaction',
             transaction: record.toBroadcastHex,
@@ -148,7 +148,7 @@ export class TransactionQueueDB {
         zoneFileWatching.forEach(record => {
           results.push({
             type: 'zoneFile',
-            transaction: record.toBroadcastZF,
+            zoneFile: record.toBroadcastZF,
             txToWatch: record.toWatchTxHash,
             confirmations: record.confirmations
           })
@@ -167,7 +167,7 @@ export class TransactionQueueDB {
       throw new Error(`Unknown tracking type: ${entry.type}`)
     }
     const cmd = `DELETE FROM ${table} WHERE toWatchTxHash = ?`
-    const args = [txToWatch]
-    return dbRun(this.db, cmd. args)
+    const args = [entry.txToWatch]
+    return dbRun(this.db, cmd, args)
   }
 }
