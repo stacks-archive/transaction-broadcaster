@@ -11,7 +11,7 @@ const configDevelopDefaults = {
       json: false
   },
   checkTransactionPeriod: 0.1,
-  dbLocation: '/tmp/subdomain_registrar.db',
+  dbLocation: '/tmp/transaction_broadcaster.db',
   regtest: true,
   port: 16269
 }
@@ -26,7 +26,7 @@ const configDefaults = {
       json: false
   },
   checkTransactionPeriod: 5,
-  dbLocation: '/root/subdomain_registrar.db',
+  dbLocation: '/root/transaction_broadcaster',
   regtest: false,
   port: 3000
 }
