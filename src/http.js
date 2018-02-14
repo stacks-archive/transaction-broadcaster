@@ -34,13 +34,13 @@ export function makeHTTPServer(config) {
     server.broadcastNow(request.preorderTransaction)
       .then((txidPreorder) => {
         preorderTx = txidPreorder
-        logger.info(`Queueing register: ${request.registerTransaction} to follow tx ${txidPreorder}`)
+        logger.info(`Queueing register to follow tx ${txidPreorder}`)
         return server.queueTransactionToBroadcast(
           request.registerTransaction, txidPreorder, confirmations)
       })
       .then((txidRegister) => {
         registerTx = txidRegister
-        return server.queueZoneFileBroadcast(txidRegister, request.zoneFile)
+        return server.queueZoneFileBroadcast(request.zoneFile, txidRegister)
       })
       .then(() => {
         res.writeHead(202, HEADERS)
@@ -131,6 +131,10 @@ export function makeHTTPServer(config) {
       setInterval(() => {
         logger.debug('Waking up to check transactions')
         server.checkWatchlist()
+          .catch((err) => {
+            logger.error(`Error checking transactions: ${err}`)
+            logger.error(err.stack)
+          })
       }, transactionDelay)
       return app
     })

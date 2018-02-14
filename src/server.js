@@ -20,7 +20,7 @@ function checkTransactions(entries: Array<{txToWatch: String, confirmations: Num
         return bskConfig.network.getTransactionInfo(entry.txToWatch)
           .then(txInfo => {
             if (!txInfo.block_height) {
-              logger.info(`Failed to get block_height for ${entry.txToWatch} --- probably still unconfirmed.`)
+              logger.info(`${entry.txToWatch}: has 0 confirmations`)
               return false
             } else if (1 + blockHeight - txInfo.block_height < entry.confirmations) {
               logger.info(`${entry.txToWatch}: has ${1 + blockHeight - txInfo.block_height} confirmations.`)
@@ -28,6 +28,10 @@ function checkTransactions(entries: Array<{txToWatch: String, confirmations: Num
             } else {
               return true
             }
+          })
+          .catch((err) => {
+            logger.info(`${entry.txToWatch}: has 0 confirmations`)
+            return false
           })
           .then(status => Object.assign({}, entry, { status }))
       })))
@@ -133,11 +137,14 @@ export class TransactionBroadcaster {
   }
 
   broadcastNow(txHex: String) {
+    const txHash = transactionToTxId(txHex)
+    logger.info(`Broadcasting transaction ${txHash}`)
     return bskConfig.network.broadcastTransaction(txHex)
-      .then(() => transactionToTxId(txHex))
+      .then(() => txHash)
   }
 
   broadcastZoneFile(zonefile: String) {
+    logger.info(`Broadcasting zonefile ${zonefile.slice(0, 10)}...}`)
     if (bskConfig.network.blockstackAPIUrl === 'https://core.blockstack.org') {
       return directlyPublishZonefile(zonefile)
     } else {
