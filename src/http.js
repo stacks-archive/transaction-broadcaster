@@ -132,5 +132,6 @@ export function makeHTTPServer(config) {
         logger.debug('Waking up to check transactions')
         server.checkQueue()
       }, transactionDelay)
+      return app
     })
 }
