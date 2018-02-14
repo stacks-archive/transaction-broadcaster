@@ -134,6 +134,7 @@ export class TransactionBroadcaster {
 
   broadcastNow(txHex: String) {
     return bskConfig.network.broadcastTransaction(txHex)
+      .then(() => transactionToTxId(txHex))
   }
 
   broadcastZoneFile(zonefile: String) {
