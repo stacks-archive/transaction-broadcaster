@@ -30,6 +30,7 @@ function checkTransactions(entries: Array<{txToWatch: String, confirmations: Num
             }
           })
           .catch((err) => {
+            logger.debug(err)
             logger.info(`${entry.txToWatch}: has 0 confirmations`)
             return false
           })

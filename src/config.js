@@ -1,3 +1,4 @@
+import { config as bskConfig, network as bskNetwork } from 'blockstack'
 import winston from 'winston'
 import fs from 'fs'
 
@@ -40,6 +41,14 @@ export function getConfig() {
   if (process.env.BSK_TRANSACTION_BROADCAST_CONFIG) {
     const configFile = process.env.BSK_TRANSACTION_BROADCAST_CONFIG
     Object.assign(config, JSON.parse(fs.readFileSync(configFile)))
+  }
+
+  if (config.regtest) {
+    bskConfig.network = bskNetwork.defaults.LOCAL_REGTEST
+    if (process.env.BLOCKSTACK_TEST_CLIENT_RPC_PORT) {
+      const port = process.env.BLOCKSTACK_TEST_CLIENT_RPC_PORT
+      bskConfig.network.apiUrl = `http://localhost:${port}`
+    }
   }
 
   config.winstonConfig = { transports: [
