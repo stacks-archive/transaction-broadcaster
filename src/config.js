@@ -26,7 +26,7 @@ const configDefaults = {
       json: false
   },
   checkTransactionPeriod: 5,
-  dbLocation: '/root/transaction_broadcaster',
+  dbLocation: '/root/transaction_broadcaster.db',
   regtest: false,
   port: 3000
 }

@@ -41,7 +41,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kantai/transaction-broadcaster.git"
+    "url": "git+https://github.com/blockstack/transaction-broadcaster.git"
   },
   "author": {
     "name": "Blockstack PBC",
@@ -55,7 +55,7 @@
     }
   ],
   "bugs": {
-    "url": "https://github.com/kantai/transaction-broadcaster/issues"
+    "url": "https://github.com/blockstack/transaction-broadcaster/issues"
   },
-  "homepage": "https://github.com/kantai/transaction-broadcaster#readme"
+  "homepage": "https://github.com/blockstack/transaction-broadcaster#readme"
 }
