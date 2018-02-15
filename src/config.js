@@ -47,7 +47,7 @@ export function getConfig() {
     bskConfig.network = bskNetwork.defaults.LOCAL_REGTEST
     if (process.env.BLOCKSTACK_TEST_CLIENT_RPC_PORT) {
       const port = process.env.BLOCKSTACK_TEST_CLIENT_RPC_PORT
-      bskConfig.network.apiUrl = `http://localhost:${port}`
+      bskConfig.network.blockstackAPIUrl = `http://localhost:${port}`
     }
   }
 
