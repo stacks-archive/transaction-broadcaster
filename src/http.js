@@ -21,6 +21,10 @@ export function makeHTTPServer(config) {
 
   app.use(cors())
   app.use(bodyParser.json())
+  
+  app.get('/v1/status', (req, res) => {
+    res.write(JSON.stringify({"status": "OK"}))
+  })
 
   app.post('/v1/broadcast/registration', (req, res) => {
     const request = req.body
