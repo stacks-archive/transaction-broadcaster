@@ -23,7 +23,8 @@ export function makeHTTPServer(config) {
   app.use(bodyParser.json())
   
   app.get('/v1/status', (req, res) => {
-    res.write(JSON.stringify({"status": "OK"}))
+    res.status(200).json(JSON.stringify({"status": "OK"}))
+    res.end()
   })
 
   app.post('/v1/broadcast/registration', (req, res) => {
