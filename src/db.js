@@ -131,8 +131,10 @@ export class TransactionQueueDB {
   }
 
   getTrackedTransactions() {
-    const txCmd = 'SELECT * FROM watch_tx_with_tx_queue'
-    const zfCmd = 'SELECT * FROM watch_tx_with_zf_queue'
+    const txCmd = `SELECT *, strftime("%s","now") - strftime("%s",received_ts)
+                   as seconds_queued FROM watch_tx_with_tx_queue`
+    const zfCmd = `SELECT *, strftime("%s","now") - strftime("%s",received_ts)
+                   as seconds_queued FROM watch_tx_with_zf_queue`
 
     return Promise.all([dbAll(this.db, txCmd), dbAll(this.db, zfCmd)])
       .then(([transactionWatching, zoneFileWatching]) => {
@@ -142,7 +144,8 @@ export class TransactionQueueDB {
             type: 'transaction',
             transaction: record.toBroadcastHex,
             txToWatch: record.toWatchTxHash,
-            confirmations: record.confirmations
+            confirmations: record.confirmations,
+            secondsQueued: record.seconds_queued
           })
         })
         zoneFileWatching.forEach(record => {
@@ -150,7 +153,8 @@ export class TransactionQueueDB {
             type: 'zoneFile',
             zoneFile: record.toBroadcastZF,
             txToWatch: record.toWatchTxHash,
-            confirmations: record.confirmations
+            confirmations: record.confirmations,
+            secondsQueued: record.seconds_queued
           })
         })
         return results

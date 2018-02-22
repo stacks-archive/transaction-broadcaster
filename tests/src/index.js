@@ -33,7 +33,8 @@ function testServer() {
   test('queueRegistration', (t) => {
     t.plan(3)
 
-    let s = new TransactionBroadcaster({ dbLocation: ':memory:' })
+    let s = new TransactionBroadcaster({ dbLocation: ':memory:',
+                                         stalenessDeadline: 60 })
     s.initializeServer()
       .then(
         () =>
