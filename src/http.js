@@ -23,7 +23,7 @@ export function makeHTTPServer(config) {
   app.use(bodyParser.json())
   
   app.get('/v1/status', (req, res) => {
-    res.status(200).json(JSON.stringify({"status": "OK"}))
+    res.status(200).json({"status": "OK"})
     res.end()
   })
 
