@@ -14,13 +14,13 @@ const configDevelopDefaults = {
   checkTransactionPeriod: 0.1,
   dbLocation: '/tmp/transaction_broadcaster.db',
   regtest: true,
+  stalenessDeadline: 10*60,
   port: 16269,
   blockstack: {
     node: "https://node.blockstack.org:6263",
     api: "https://core.blockstack.org",
     utxo: "https://utxo.blockstack.org"
   }
-  
 }
 
 const configDefaults = {
@@ -35,6 +35,7 @@ const configDefaults = {
   checkTransactionPeriod: 5,
   dbLocation: '/root/transaction_broadcaster.db',
   regtest: false,
+  stalenessDeadline: 2*60*60,
   port: 3000,
   blockstack: {
     node: "https://node.blockstack.org:6263",

@@ -98,8 +98,9 @@ export function directlyPublishZonefile(zonefile: string) {
 }
 
 export class TransactionBroadcaster {
-  constructor(config: {dbName: String}) {
+  constructor(config: {dbName: String, stalenessDeadline: Number}) {
     this.db = new TransactionQueueDB(config.dbLocation)
+    this.stalenessDeadline = config.stalenessDeadline
     this.lock = new ReadWriteLock()
   }
 
@@ -163,7 +164,13 @@ export class TransactionBroadcaster {
           if (entries.length > 0) {
             logger.info(`${entries.length} watched transactions, not fully confirmed`)
           }
-          return checkTransactions(entries)
+          entries.forEach((entry) => {
+            if (entry.secondsQueued > this.stalenessDeadline) {
+              logger.info(`${entry.txToWatch} is stale, will skip checking.`)
+            }
+          })
+          return checkTransactions(entries.filter(
+            entry => entry.secondsQueued <= this.stalenessDeadline))
         })
         .then(transactionsComplete => Promise.all(
           transactionsComplete.map(
