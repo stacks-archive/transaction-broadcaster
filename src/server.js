@@ -3,9 +3,6 @@ import btc from 'bitcoinjs-lib'
 import { config as bskConfig } from 'blockstack'
 import ReadWriteLock from 'rwlock'
 import fetch from 'node-fetch'
-import { getConfig } from './config'
-
-const config = getConfig()
 
 import { TransactionQueueDB } from './db'
 
@@ -44,8 +41,6 @@ function checkTransactions(entries: Array<{txToWatch: String, confirmations: Num
 // this is a hack -- this is a stand-in while we roll out support for
 //   publishing zonefiles via core.blockstack
 export function directlyPublishZonefile(zonefile: string) {
-  // speak directly to ${config.blockstack.node}
-
   const b64Zonefile = Buffer.from(zonefile).toString('base64')
 
   const postData = '<?xml version=\'1.0\'?>' +
@@ -54,17 +49,17 @@ export function directlyPublishZonefile(zonefile: string) {
          <string>${b64Zonefile}</string></value>
          </data></array></param></params>` +
         '</methodCall>'
-  return fetch(`${config.blockstack.node}/RPC2`,
+  return fetch('https://node.blockstack.org:6263/RPC2',
                { method: 'POST',
                  body: postData })
     .then(resp => {
       if (resp.status >= 200 && resp.status <= 299){
         return resp.text()
       } else {
-        logger.error(`Publish zonefile error: Response code from ${config.blockstack.node}: ${resp.status}`)
+        logger.error(`Publish zonefile error: Response code from node.blockstack: ${resp.status}`)
         resp.text().then(
-          (text) => logger.error(`Publish zonefile error: Response from ${config.blockstack.node}: ${text}`))
-        throw new Error(`Failed to publish zonefile. Bad response from ${config.blockstack.node}`)
+          (text) => logger.error(`Publish zonefile error: Response from node.blockstack: ${text}`))
+        throw new Error('Failed to publish zonefile. Bad response from node.blockstack')
       }
     })
     .then(respText => {
@@ -75,7 +70,7 @@ export function directlyPublishZonefile(zonefile: string) {
       try {
         jsonResp = JSON.parse(dataResp)
       } catch (err) {
-        logger.error(`Failed to parse JSON response from ${config.blockstack.node}: ${respText}`)
+        logger.error(`Failed to parse JSON response from node.blockstack.org: ${respText}`)
         throw err
       }
       if ('error' in jsonResp) {
@@ -84,7 +79,7 @@ export function directlyPublishZonefile(zonefile: string) {
       }
 
       if (!jsonResp.saved || jsonResp.saved.length < 1) {
-        throw new Error(`Invalid "saved" response from ${config.blockstack.node}`)
+        throw new Error('Invalid "saved" response from node.blockstack')
       }
 
       if (jsonResp.saved[0] === 1) {
@@ -93,7 +88,7 @@ export function directlyPublishZonefile(zonefile: string) {
         throw new Error('Zonefile not saved')
       }
 
-      throw new Error(`Invalid "saved" response from ${config.blockstack.node}`)
+      throw new Error('Invalid "saved" response from node.blockstack')
     })
 }
 
@@ -150,7 +145,7 @@ export class TransactionBroadcaster {
 
   broadcastZoneFile(zonefile: String) {
     logger.info(`Broadcasting zonefile ${zonefile.slice(0, 10)}...}`)
-    if (bskConfig.network.blockstackAPIUrl === `${config.blockstack.api}`) {
+    if (bskConfig.network.blockstackAPIUrl === 'https://core.blockstack.org') {
       return directlyPublishZonefile(zonefile)
     } else {
       return bskConfig.network.broadcastZoneFile(zonefile)

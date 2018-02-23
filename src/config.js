@@ -16,10 +16,10 @@ const configDevelopDefaults = {
   regtest: true,
   stalenessDeadline: 10*60,
   port: 16269,
-  blockstack: {
-    node: "https://node.blockstack.org:6263",
-    api: "https://core.blockstack.org",
-    utxo: "https://utxo.blockstack.org"
+  blockstack: { // right now, these are placeholders --
+                // this is not actually configurable yet
+    api: 'https://core.blockstack.org',
+    utxo: 'https://utxo.blockstack.org'
   }
 }
 
@@ -37,10 +37,10 @@ const configDefaults = {
   regtest: false,
   stalenessDeadline: 2*60*60,
   port: 3000,
-  blockstack: {
-    node: "https://node.blockstack.org:6263",
-    api: "https://core.blockstack.org",
-    utxo: "https://utxo.blockstack.org"
+  blockstack: { // right now, these are placeholders --
+                // this is not actually configurable yet
+    api: 'https://core.blockstack.org',
+    utxo: 'https://utxo.blockstack.org'
   }
 }
 

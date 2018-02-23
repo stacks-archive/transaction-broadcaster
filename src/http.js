@@ -21,9 +21,9 @@ export function makeHTTPServer(config) {
 
   app.use(cors())
   app.use(bodyParser.json())
-  
+
   app.get('/v1/status', (req, res) => {
-    res.status(200).json({"status": "OK"})
+    res.status(200).json({ 'status': 'OK' })
     res.end()
   })
 
