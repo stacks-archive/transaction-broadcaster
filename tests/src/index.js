@@ -18,7 +18,7 @@ function testServer() {
 
   nock('https://blockchain.info')
     .persist()
-    .get('/latestblock')
+    .get('/latestblock?cors=true')
     .reply(200, { height: 300 })
 
   let txs = [{hash: 'to-watch-1', height: 294},
@@ -27,7 +27,7 @@ function testServer() {
 
   txs.forEach( x => nock('https://blockchain.info')
                .persist()
-               .get(`/rawtx/${x.hash}`)
+               .get(`/rawtx/${x.hash}?cors=true`)
                .reply(200, { block_height: x.height }) )
 
   test('queueRegistration', (t) => {
