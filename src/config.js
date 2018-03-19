@@ -2,8 +2,10 @@ import { config as bskConfig, network as bskNetwork } from 'blockstack'
 import winston from 'winston'
 import fs from 'fs'
 import os from 'os'
+import process from 'process'
 
-const DB_PATH = '~/transaction_broadcaster.db';
+const BLOCKSTACK_TEST = process.env.BLOCKSTACK_TEST;
+const DB_PATH = BLOCKSTACK_TEST ? '~/transaction_broadcaster.testnet.db' : '~/transaction_broadcaster.db';
 
 const configDevelopDefaults = {
   winstonConsoleTransport: {
