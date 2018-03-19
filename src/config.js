@@ -4,8 +4,8 @@ import fs from 'fs'
 import os from 'os'
 import process from 'process'
 
-const BLOCKSTACK_TEST = process.env.BLOCKSTACK_TEST;
-const DB_PATH = BLOCKSTACK_TEST ? '~/transaction_broadcaster.testnet.db' : '~/transaction_broadcaster.db';
+const BLOCKSTACK_TEST = process.env.BLOCKSTACK_TEST
+const DB_PATH = BLOCKSTACK_TEST ? '~/transaction_broadcaster.testnet.db' : '~/transaction_broadcaster.db'
 
 const configDevelopDefaults = {
   winstonConsoleTransport: {
