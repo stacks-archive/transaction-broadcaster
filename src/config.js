@@ -1,6 +1,9 @@
 import { config as bskConfig, network as bskNetwork } from 'blockstack'
 import winston from 'winston'
 import fs from 'fs'
+import os from 'os'
+
+const DB_PATH = '~/transaction_broadcaster.db';
 
 const configDevelopDefaults = {
   winstonConsoleTransport: {
@@ -33,7 +36,7 @@ const configDefaults = {
       json: false
   },
   checkTransactionPeriod: 5,
-  dbLocation: '/root/transaction_broadcaster.db',
+  dbLocation: os.homedir() ? DB_PATH.replace(/^~($|\/|\\)/, `${os.homedir()}$1`) : DB_PATH,
   regtest: false,
   stalenessDeadline: 2*60*60,
   port: 3000,
