@@ -36,7 +36,8 @@ export function makeHTTPServer(config) {
     let preorderTx, registerTx
 
     const confirmations = request.confirmations || 4
-    server.broadcastNow(request.preorderTransaction)
+    server.checkAndQueueInputs(request.preorderTransaction)
+      .then(() => server.broadcastNow(request.preorderTransaction))
       .then((txidPreorder) => {
         preorderTx = txidPreorder
         logger.info(`Queueing register to follow tx ${txidPreorder}`)

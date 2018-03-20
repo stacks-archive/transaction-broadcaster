@@ -127,8 +127,30 @@ export class TransactionBroadcaster {
       return Promise.reject(new Error('Confirmations must be between 1 and 10'))
     }
     return this.withLock(
-      () => this.db.queueTransactionToBroadcast(toBroadcast, txidToWatch, confirmations)
+      () => this.checkAndQueueInputs(toBroadcast)
+        .then(() => this.db.queueTransactionToBroadcast(toBroadcast, txidToWatch, confirmations))
         .then(() => transactionToTxId(toBroadcast)))
+  }
+
+  checkAndQueueInputs(txHex: String) {
+    logger.info('checking transaction!!')
+    const tx = btc.Transaction.fromHex(txHex)
+    const checkPromises = tx.ins.map((utxoUsed) => {
+      const txHash = Buffer.from(utxoUsed.hash)
+      txHash.reverse()
+      return this.db.isInputToBeConsumed(txHash.toString('hex'),
+                                         utxoUsed.index,
+                                         this.stalenessDeadline)
+        .then((inputAlreadyQueued) => {
+          if (inputAlreadyQueued) {
+            throw new Error('One of the inputs is already queued to be' +
+                            ' consumed by another transaction.')
+          }
+        })
+        .then(() => this.db.queueInputsConsumed(txHash.toString('hex'),
+                                                utxoUsed.index))
+    })
+    return Promise.all(checkPromises)
   }
 
   queueZoneFileBroadcast(zoneFile: String, txidToWatch: String) {

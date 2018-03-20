@@ -1,6 +1,6 @@
 {
   "name": "blockstack-transaction-broadcaster",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A transaction broadcaster for Blockstack",
   "main": "lib/index.js",
   "dependencies": {
@@ -26,7 +26,7 @@
     "tape-istanbul": "^1.2.0"
   },
   "bin": {
-     "blockstack-transaction-broadcaster": "./lib/index.js"
+    "blockstack-transaction-broadcaster": "./lib/index.js"
   },
   "scripts": {
     "start": "npm run build && node lib/index.js",
