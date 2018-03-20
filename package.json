@@ -26,7 +26,7 @@
     "tape-istanbul": "^1.2.0"
   },
   "bin": {
-     "blockstack-transaction-broadcaster": "./lib/index.js"
+    "blockstack-transaction-broadcaster": "./lib/index.js"
   },
   "scripts": {
     "start": "npm run build && node lib/index.js",

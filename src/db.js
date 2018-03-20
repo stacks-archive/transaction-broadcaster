@@ -29,6 +29,11 @@ const CREATE_TRANSACTIONS_BACKUPS = `CREATE TABLE tx_backups (
  timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
 );`
 
+const CREATE_INPUTS_TO_CONSUME = `CREATE TABLE inputs_to_consume (
+ txHash TEXT NOT NULL,
+ txOutputN INTEGER NOT NULL,
+ timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+);`
 
 function dbRun(db: Object, cmd: String, args?: Array) {
   if (!args) {
@@ -84,7 +89,7 @@ export class TransactionQueueDB {
           this.tablesExist()
             .then( exist => {
               if (exist) {
-                return Promise.resolve()
+                return this.checkCreateInputsTable()
               } else {
                 return this.createTables()
               }
@@ -93,6 +98,21 @@ export class TransactionQueueDB {
         }
       })
     })
+  }
+
+  checkCreateInputsTable() {
+    return dbAll(this.db, 'SELECT name FROM sqlite_master WHERE type = "table"')
+      .then( results => {
+        const tables = results.map( x => x.name )
+        return tables.indexOf('inputs_to_consume')
+      })
+      .then( exists => {
+        if (exists) {
+          return Promise.resolve()
+        } else {
+          return dbRun(this.db, CREATE_INPUTS_TO_CONSUME)
+        }
+      })
   }
 
   tablesExist() {
@@ -108,12 +128,29 @@ export class TransactionQueueDB {
 
   createTables() {
     const toCreate = [CREATE_TX_QUEUE, CREATE_TRANSACTIONS_BACKUPS,
-                      CREATE_ZONEFILES_BACKUPS, CREATE_ZF_QUEUE]
+                      CREATE_ZONEFILES_BACKUPS, CREATE_ZF_QUEUE,
+                      CREATE_INPUTS_TO_CONSUME]
     let creationPromise = Promise.resolve()
     toCreate.forEach((createCmd) => {
       creationPromise = creationPromise.then(() => dbRun(this.db, createCmd))
     })
     return creationPromise
+  }
+
+  queueInputsConsumed(txHash, txOutputN) {
+    const cmd = `INSERT INTO inputs_to_consume (txHash, txOutputN)
+                  VALUES (?, ?)`
+    const args = [txHash, txOutputN]
+    return dbRun(this.db, cmd, args)
+  }
+
+  isInputToBeConsumed(txHash, txOutputN, secondsLimit) {
+    const cmd = `SELECT strftime("%s","now") - strftime("%s",timestamp)
+                   as seconds_queued FROM inputs_to_consume WHERE
+                   txHash = ? AND txOutputN = ? AND seconds_queued < ?`
+    const args = [txHash, txOutputN, secondsLimit]
+    return dbAll(this.db, cmd, args)
+      .then((records) => records.length >= 1)
   }
 
   queueTransactionToBroadcast(toBroadcast, txidToWatch, confirmations) {
