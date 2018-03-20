@@ -87,7 +87,7 @@ export class TransactionQueueDB {
             })
         } else {
           this.tablesExist()
-            .then( exist => {
+            .then(exist => {
               if (exist) {
                 return this.checkCreateInputsTable()
               } else {
@@ -104,12 +104,13 @@ export class TransactionQueueDB {
     return dbAll(this.db, 'SELECT name FROM sqlite_master WHERE type = "table"')
       .then( results => {
         const tables = results.map( x => x.name )
-        return tables.indexOf('inputs_to_consume')
+        return tables.indexOf('inputs_to_consume') >= 0
       })
-      .then( exists => {
+      .then(exists => {
         if (exists) {
           return Promise.resolve()
         } else {
+          logger.info('Creating inputs tracking table')
           return dbRun(this.db, CREATE_INPUTS_TO_CONSUME)
         }
       })
@@ -121,8 +122,8 @@ export class TransactionQueueDB {
         const tables = results.map( x => x.name )
         return tables.indexOf('watch_tx_with_zf_queue') >= 0 &&
           tables.indexOf('watch_tx_with_tx_queue') >= 0 &&
-          tables.indexOf('tx_backups') >= 0
-          tables.indexOf('zonefiles_backups') >= 0
+          tables.indexOf('tx_backups') >= 0 &&
+          tables.indexOf('zonefile_backups') >= 0
       })
   }
 
