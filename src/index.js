@@ -1,3 +1,4 @@
+#!/usr/bin/node
 import logger from 'winston'
 
 import { makeHTTPServer } from './http'
