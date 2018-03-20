@@ -182,8 +182,9 @@ export class TransactionBroadcaster {
             logger.info(`${entries.length} watched transactions, not fully confirmed`)
           }
           entries.forEach((entry) => {
-            if (entry.secondsQueued > this.stalenessDeadline) {
-              logger.info(`${entry.txToWatch} is stale, will skip checking.`)
+            if (entry.secondsQueued > this.stalenessDeadline &&
+                entry.secondsQueued < 2*this.stalenessDeadline) {
+                logger.info(`${entry.txToWatch} is stale, will skip checking.`)
             }
           })
           return checkTransactions(entries.filter(
