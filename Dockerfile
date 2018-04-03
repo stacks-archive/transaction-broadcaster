@@ -12,6 +12,6 @@ WORKDIR /src/transaction-broadcaster
 # Copy files into container
 COPY . .
 
-RUN npm i && npm ln blockstack
+RUN npm i
 
 CMD ["npm", "run", "start"]
