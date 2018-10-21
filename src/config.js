@@ -52,7 +52,7 @@ const configDefaults = {
 
 export function getConfig() {
   let config = Object.assign({}, configDefaults)
-  if (process.env.BSK_TRANSACTION_BROADCAST_DEVELOP) {
+  if (process.env.BSK_TRANSACTION_BROADCAST_DEVELOP || BLOCKSTACK_TEST) {
     config = Object.assign({}, configDevelopDefaults)
   }
   if (process.env.BSK_TRANSACTION_BROADCAST_CONFIG) {
