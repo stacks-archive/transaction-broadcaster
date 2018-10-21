@@ -14,6 +14,6 @@ makeHTTPServer(config)
   })
   .then((server) => {
     server.listen(config.port, () => {
-      console.log('Blockstack Transaction Broadcaster started.')
+      console.log(`Blockstack Transaction Broadcaster started on port ${config.port}.`)
     })
   })
