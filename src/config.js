@@ -68,9 +68,9 @@ export function getConfig() {
     }
   }
 
-  config.winstonConfig = { transports: [
-    new winston.transports.Console(config.winstonConsoleTransport)
-  ] }
+  winston.configure({ transports: [
+    new winston.transports.Console(config.argsTransport) ] })
+
 
   return config
 }
