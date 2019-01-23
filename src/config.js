@@ -68,6 +68,13 @@ export function getConfig() {
     }
   }
 
+  if (process.env.BSK_BCAST_STALENESS_DEADLINE) {
+    config.stalenessDeadline = parseInt(process.env.BSK_BCAST_STALENESS_DEADLINE)
+  }
+  if (!config.stalenessDeadline) {
+    throw new Error(`Bad staleness deadline: ${config.stalenessDeadline}`)
+  }
+
   winston.configure({ transports: [
     new winston.transports.Console(config.winstonConsoleTransport) ] })
 
