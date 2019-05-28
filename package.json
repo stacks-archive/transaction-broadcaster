@@ -8,7 +8,7 @@
     "cors": "^2.8.4",
     "express": "^4.16.2",
     "node-fetch": "^2.0.0",
-    "rwlock": "^5.0.0",
+    "async-lock": "^1.1.3",
     "sqlite3": "^4.0.8",
     "winston": "^2.4.0"
   },
