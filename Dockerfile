@@ -1,11 +1,4 @@
-FROM ubuntu:xenial
-
-# Update apt and install wget
-RUN apt-get update && apt-get install -y wget curl apt-utils git
-
-# Install node
-RUN curl -sL https://deb.nodesource.com/setup_6.x | bash -
-RUN apt-get update && apt-get install -y nodejs
+FROM node:10
 
 # Project directory
 WORKDIR /src/transaction-broadcaster
