@@ -1,10 +1,12 @@
 import logger from 'winston'
 import btc from 'bitcoinjs-lib'
 import { config as bskConfig } from 'blockstack'
-import ReadWriteLock from 'rwlock'
+import AsyncLock from 'async-lock'
 import fetch from 'node-fetch'
 
 import { TransactionQueueDB } from './db'
+
+const QUEUE_LOCK = 'queue'
 
 function transactionToTxId(transaction: String) {
   return btc.Transaction.fromHex(transaction)
@@ -96,7 +98,7 @@ export class TransactionBroadcaster {
   constructor(config: {dbName: String, stalenessDeadline: Number}) {
     this.db = new TransactionQueueDB(config.dbLocation)
     this.stalenessDeadline = config.stalenessDeadline
-    this.lock = new ReadWriteLock()
+    this.lock = new AsyncLock()
   }
 
   initializeServer() {
@@ -104,20 +106,14 @@ export class TransactionBroadcaster {
   }
 
   withLock(cb) {
-    return new Promise((resolve, reject) => {
-      this.lock.writeLock((release) => {
-        cb()
-          .then((response) => {
-            release()
-            resolve(response)
-          })
-          .catch((err) => {
-            logger.error(`Caught error ${err}, releasing lock and rejecting promise`)
-            release()
-            reject(err)
-          })
+    return this.lock.acquire(QUEUE_LOCK, cb, { timeout: 5000 })
+      .catch((err) => {
+        if (err && err.message && err.message == 'async-lock timed out') {
+          throw new Error('Failed to obtain lock')
+        } else {
+          throw err
+        }
       })
-    })
   }
 
   queueTransactionToBroadcast(toBroadcast: String,
