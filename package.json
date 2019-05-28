@@ -1,6 +1,6 @@
 {
   "name": "blockstack-transaction-broadcaster",
-  "version": "0.2.2",
+  "version": "1.0.0",
   "description": "A transaction broadcaster for Blockstack",
   "main": "lib/index.js",
   "dependencies": {
